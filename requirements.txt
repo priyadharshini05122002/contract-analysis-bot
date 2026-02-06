@@ -7,3 +7,8 @@ langdetect
 werkzeug
 pymysql
 sentence-transformers
+spacy
+PyPDF2
+pdfplumber
+python-docx
+torch
