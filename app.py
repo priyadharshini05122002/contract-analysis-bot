@@ -45,11 +45,21 @@ st.set_page_config(
 # Cached models
 @st.cache_resource
 def load_spacy_model():
-    import spacy
+    import os
     try:
-        return spacy.load("en_core_web_sm")
-    except Exception:
-        return spacy.blank("en")
+        import spacy
+    except:
+        os.system("pip install spacy")
+        import spacy
+
+    try:
+        nlp = spacy.load("en_core_web_sm")
+    except:
+        os.system("python -m spacy download en_core_web_sm")
+        nlp = spacy.load("en_core_web_sm")
+
+    return nlp
+
 
 @st.cache_resource
 def load_embedding_model():
