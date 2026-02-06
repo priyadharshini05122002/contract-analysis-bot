@@ -57,6 +57,7 @@ advanced = st.sidebar.checkbox("Enable advanced NLP", value=True)
 contract_text: Optional[str] = None
 if uploaded_file is not None:
     contract_text = load_contract_text(uploaded_file)
+    st.write("DEBUG contract length:", len(contract_text) if contract_text else 0)
 
 if not contract_text:
     st.info("Please upload a contract to begin analysis.")
