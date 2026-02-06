@@ -21,7 +21,7 @@ from utils import (
 
 # ─── Database & Auth imports ──────────────────────────────────────────────
 from db import (
-    ensure_migrations,
+   init_db, ensure_migrations,
     save_analysis, list_analyses, save_embedding, delete_analysis, get_conn,
     verify_user, get_user_by_email, register_user   # ← added these
 )
@@ -35,31 +35,21 @@ st.set_page_config(
     layout="wide"
 )
 
-# # Initialize DB
-# init_db()
-# try:
-#     ensure_migrations()
-# except Exception:
-#     pass
+# Initialize DB
+init_db()
+try:
+    ensure_migrations()
+except Exception:
+    pass
 
 # Cached models
-@st.cache_resource
-def load_spacy_model():
-    import os
-    try:
-        import spacy
-    except:
-        os.system("pip install spacy")
-        import spacy
-
-    try:
-        nlp = spacy.load("en_core_web_sm")
-    except:
-        os.system("python -m spacy download en_core_web_sm")
-        nlp = spacy.load("en_core_web_sm")
-
-    return nlp
-
+# @st.cache_resource
+# def load_spacy_model():
+#     import spacy
+#     try:
+#         return spacy.load("en_core_web_sm")
+#     except Exception:
+#         return spacy.blank("en")
 
 @st.cache_resource
 def load_embedding_model():
@@ -69,7 +59,9 @@ def load_embedding_model():
     except Exception:
         return None
 
-nlp = load_spacy_model()
+# nlp = load_spacy_model()
+nlp = None
+
 embed_model = load_embedding_model()
 
 # ────────────────────────────────────────────────
@@ -231,13 +223,17 @@ for i, clause in enumerate(clauses, start=1):
     ner_entities = []
     obligations = []
 
-    if advanced and nlp is not None:
+    if advanced and nlp:
         doc = nlp(clause)
-        ner_entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
-        obligations = [
-            sent.text for sent in doc.sents
-            if re.search(r'\bshall\b|\bmust\b|\bagree to\b|\bwill\b', sent.text, flags=re.I)
-        ]
+
+    # if doc:
+    #     ner_entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
+
+    #     obligations = []
+    #     for sent in getattr(doc, "sents", []):
+    #         if re.search(r'\bshall\b|\bmust\b|\bagree to\b|\bwill\b', sent.text, flags=re.I):
+    #             obligations.append(sent.text)
+
 
     risk, reasons, risk_score = analyze_clause_risk(clause)
     suggestion = suggest_alternatives_for_clause(clause, risk, reasons)
