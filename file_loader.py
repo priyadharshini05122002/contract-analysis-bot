@@ -2,63 +2,63 @@
 from typing import Optional
 from io import BytesIO
 
-
 def load_contract_text(uploaded_file) -> Optional[str]:
     """
     Extract text from uploaded contract files.
     Supports: PDF, DOCX, TXT.
-    Returns cleaned string or None.
+    Works on Streamlit Cloud.
     """
-    if not uploaded_file:
+
+    if uploaded_file is None:
         return None
 
-    name = uploaded_file.name.lower()
+    file_name = uploaded_file.name.lower()
 
     try:
         # ---------- TXT ----------
-        if name.endswith(".txt"):
+        if file_name.endswith(".txt"):
             content = uploaded_file.getvalue().decode("utf-8", errors="ignore")
             return content.strip() if content else None
 
-        # ---------- PDF ----------
-        elif name.endswith(".pdf"):
+        # ---------- PDF (FIXED) ----------
+        elif file_name.endswith(".pdf"):
             from PyPDF2 import PdfReader
 
-            data = uploaded_file.read()
-            reader = PdfReader(BytesIO(data))
+            # IMPORTANT: use getvalue() not read()
+            pdf_bytes = uploaded_file.getvalue()
+            reader = PdfReader(BytesIO(pdf_bytes))
 
-            pages = []
+            text_pages = []
+
             for page in reader.pages:
                 try:
-                    text = page.extract_text()
-                    if text and text.strip():
-                        pages.append(text.strip())
-                except Exception:
-                    continue
+                    page_text = page.extract_text()
+                    if page_text:
+                        text_pages.append(page_text.strip())
+                except:
+                    pass
 
-            full_text = "\n\n".join(pages)
-            return full_text if full_text else None
+            full_text = "\n".join(text_pages)
+
+            # DEBUG (optional)
+            if not full_text:
+                return None
+
+            return full_text
 
         # ---------- DOCX ----------
-        elif name.endswith(".docx"):
+        elif file_name.endswith(".docx"):
             import docx
 
-            data = uploaded_file.read()
-            doc = docx.Document(BytesIO(data))
-
-            paragraphs = []
-            for p in doc.paragraphs:
-                if p.text and p.text.strip():
-                    paragraphs.append(p.text.strip())
-
-            full_text = "\n\n".join(paragraphs)
-            return full_text if full_text else None
+            doc = docx.Document(BytesIO(uploaded_file.getvalue()))
+            paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+            return "\n".join(paragraphs)
 
         # ---------- FALLBACK ----------
         else:
             content = uploaded_file.getvalue().decode("utf-8", errors="ignore")
             return content.strip() if content else None
 
-    except Exception:
-        # Prevent Streamlit crash if parsing fails
+    except Exception as e:
+        print("FILE LOAD ERROR:", e)
         return None
