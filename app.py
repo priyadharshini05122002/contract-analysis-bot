@@ -21,7 +21,7 @@ from utils import (
 
 # ─── Database & Auth imports ──────────────────────────────────────────────
 from db import (
-    init_db, ensure_migrations,
+    ensure_migrations,
     save_analysis, list_analyses, save_embedding, delete_analysis, get_conn,
     verify_user, get_user_by_email, register_user   # ← added these
 )
@@ -35,12 +35,12 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize DB
-init_db()
-try:
-    ensure_migrations()
-except Exception:
-    pass
+# # Initialize DB
+# init_db()
+# try:
+#     ensure_migrations()
+# except Exception:
+#     pass
 
 # Cached models
 @st.cache_resource

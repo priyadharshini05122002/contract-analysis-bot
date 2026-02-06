@@ -1,7 +1,10 @@
-
 streamlit
 pandas
 numpy
 scikit-learn
 mysql-connector-python
 langdetect
+werkzeug
+pymysql
+bcrypt
+python-dotenv
